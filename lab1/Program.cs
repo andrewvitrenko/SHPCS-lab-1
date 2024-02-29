@@ -1,5 +1,14 @@
-﻿using System.Runtime.InteropServices;
-using lab1;
+﻿// Програмне забезпечення високопродуктивних комп'ютерних систем
+// Лабораторна робота №1: програмування потоків, потоки в мові С#
+// номер в списку групи 7: 1.28 2.23 3.19
+// F1: E = MAX(A) * (X + B * (MA * MD) + C)
+// F2: q = MAX(MH * MK - ML)
+// F3: S = (R + V) * (MO * MP)
+// Вітренко Андрій В'ячеславович
+// група ІМ-11
+// 28.02.2024
+
+using System.Runtime.InteropServices;
 
 namespace lab1
 {
@@ -17,9 +26,8 @@ namespace lab1
 
         public static void Main()
         {
-            N = Data.Read("Input N: ");
+            N = Data.Read("Input N: ", 4);
             isLarge = N > 100;
-            Console.WriteLine("Hello world!");
 
             int stackSize = 1024 * 1024;
 
@@ -66,7 +74,7 @@ namespace lab1
             Data data = new Data(isLarge, N);
             int[] result = data.F1();
 
-            data.Write(@"..\..\..\f1.txt", "Thread 1 result",result);
+            data.Write(@"..\..\..\f1.txt", "Thread 1 result: ", result);
 
             Console.WriteLine("Thread 1 finished");
         }
@@ -80,7 +88,7 @@ namespace lab1
             Data data = new Data(isLarge, N);
             int result = data.F2();
 
-            data.Write(@"..\..\..\f2.txt", "Thread 2 result", result);
+            data.Write(@"..\..\..\f2.txt", "Thread 2 result: ", result);
 
             Console.WriteLine("Thread 2 finished");
         }
@@ -94,7 +102,7 @@ namespace lab1
             Data data = new Data(isLarge, N);
             int[] result = data.F3();
 
-            data.Write(@"..\..\..\f3.txt", "Thread 3 result", result);
+            data.Write(@"..\..\..\f3.txt", "Thread 3 result: ", result);
 
             Console.WriteLine("Thread 3 finished");
         }

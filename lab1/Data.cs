@@ -2,53 +2,88 @@ namespace lab1;
 
 public class Data(bool isLarge, int N)
 {
-    public static int Read(string message)
+    /* ----------- Threads functions ------------ */
+
+    /**
+     * E = MAX(A) * (X + B * (MA * MD) + C)
+     */
+    public int[] F1()
+    {
+        int[] A = GenerateVector("A", 1);
+        int[] B = GenerateVector("B", 1);
+        int[] C = GenerateVector("C", 1);
+        int[] X = GenerateVector("X", 1);
+        int[,] MA = GenerateMatrix("MA", 1);
+        int[,] MD = GenerateMatrix("MD", 1);
+
+        int maxA = Max(A);
+        int[,] MA_MD = Multiply(MA, MD);
+        int[] B_MA_MD = Multiply(B, MA_MD);
+
+        int[] X_B_C = Add(X, Add(B_MA_MD, C));
+        
+        return Multiply(maxA, X_B_C);
+    }
+
+    /**
+     * a = MAX(MH * MK - ML)
+     */
+    public int F2()
+    {
+        int[,] MH = GenerateMatrix("MH", 2);
+        int[,] MK = GenerateMatrix("MK", 2);
+        int[,] ML = GenerateMatrix("ML", 2);
+
+        int[,] MH_MK = Multiply(MH, MK);
+        int[,] MH_MK_ML = Sub(MH_MK, ML);
+
+        return Max(MH_MK_ML);
+    }
+
+    /**
+     * S = (R + V) * (MO * MP)
+     */
+    public int[] F3()
+    {
+        int[] R = GenerateVector("R", 3);
+        int[] V = GenerateVector("V", 3);
+
+        int[] R_V = Add(R, V);
+
+        int[,] MO = GenerateMatrix("MO", 3);
+        int[,] MP = GenerateMatrix("MP", 3);
+
+        int[,] MO_MP = Multiply(MO, MP);
+
+        return Multiply(R_V, MO_MP);
+    }
+    
+    /* ----------- I/O ---------- */
+    public static int Read(string message, int defaultValue)
     {
         Console.Write(message);
 
-        string input = Console.ReadLine();
-
-        return Convert.ToInt32(input);
-    }
-
-    private int[,] ReadMulti(int N)
-    {
-        int[,] matrix = new int[N, N];
-
-        for (int i = 0; i < N; i++)
+        if (int.TryParse(Console.ReadLine(), out int value))
         {
-            for (int j = 0; j < N; j++)
-            {
-                matrix[i, j] = Read($"Enter value for {i + 1},{j + 1}: ");
-            }
+            return value;
         }
-        
-        return matrix;
-    }
-
-    private int[] ReadLinear(int N)
-    {
-        int[] vector = new int[N];
-
-        for (int i = 0; i < N; i++)
+        else
         {
-            vector[i] = Read($"Enter value for {i + 1}: ");
+            return defaultValue;
         }
-
-        return vector;
     }
 
     public void Write(string filename, string prefix, int[] data)
     {
         string output = string.Join(", ", data);
-        
+
         if (isLarge)
         {
             File.WriteAllText(filename, output);
         }
         else
         {
-            Console.WriteLine($"{prefix}: {output}");
+            Console.WriteLine($"{prefix}{output}");
         }
     }
 
@@ -60,9 +95,38 @@ public class Data(bool isLarge, int N)
         }
         else
         {
-            Console.WriteLine($"{prefix}: {prefix}");
+             Console.WriteLine($"{prefix}{data}");
         }
     }
+
+    private int[,] ReadMulti(string name, int N, int defaultValue)
+    {
+        int[,] matrix = new int[N, N];
+
+        for (int i = 0; i < N; i++)
+        {
+            for (int j = 0; j < N; j++)
+            {
+                matrix[i, j] = Read($"Enter value for matrix {name}[{i + 1},{j + 1}]: ", defaultValue);
+            }
+        }
+
+        return matrix;
+    }
+
+    private int[] ReadLinear(string name, int N, int defaultValue)
+    {
+        int[] vector = new int[N];
+
+        for (int i = 0; i < N; i++)
+        {
+            vector[i] = Read($"Enter value for vector {name}:[{i}]: ", defaultValue);
+        }
+
+        return vector;
+    }
+    
+    /* ---------- Calculations ------------- */
 
     private int[,] Multiply(int[,] matrixA, int[,] matrixB)
     {
@@ -117,7 +181,7 @@ public class Data(bool isLarge, int N)
         {
             result[i] = vector[i] * scalar;
         }
-        
+
         return result;
     }
 
@@ -130,7 +194,7 @@ public class Data(bool isLarge, int N)
         {
             result[i] = vectorA[i] + vectorB[i];
         }
-        
+
         return result;
     }
 
@@ -150,48 +214,7 @@ public class Data(bool isLarge, int N)
 
         return result;
     }
-
-    private int[,] GenerateMatrix()
-    {
-        if (!isLarge)
-        {
-            return ReadMulti(N);
-        }
-        
-        int[,] result = new int[N, N];
-
-        Random rnd = new Random();
-
-        for (int i = 0; i < N; i++)
-        {
-            for (int j = 0; j < N; j++)
-            {
-                result[i, j] = rnd.Next(-100, 100);
-            }
-        }
-
-        return result;
-    }
-
-    private int[] GenerateVector()
-    {
-        if (!isLarge)
-        {
-            return ReadLinear(N);
-        }
-        
-        int[] result = new int[N];
-
-        Random rnd = new Random();
-
-        for (int i = 0; i < N; i++)
-        {
-            result[i] = rnd.Next(-100, 100);
-        }
-
-        return result;
-    }
-
+    
     private int Max(int[] vector)
     {
         return vector.Max();
@@ -208,53 +231,50 @@ public class Data(bool isLarge, int N)
                 max = Math.Max(max, matrix[i, j]);
             }
         }
-        
+
         return max;
     }
+    
+    /* ----------- Generating ------------ */
 
-    public int[] F1()
+    private int[,] GenerateMatrix(string name, int fallback)
     {
-        int[] A = GenerateVector();
-        int[] B = GenerateVector();
-        int[] C = GenerateVector();
-        int[] X = GenerateVector();
-        int[,] MA = GenerateMatrix();
-        int[,] MD = GenerateMatrix();
+        if (!isLarge)
+        {
+            return ReadMulti(name, N, fallback);
+        }
 
-        int maxA = Max(A);
-        int[,] MA_MD = Multiply(MA, MD);
-        int[] B_MA_MD = Multiply(B, MA_MD);
+        int[,] result = new int[N, N];
 
-        int[] X_B_C = Add(X, Add(B_MA_MD, C));
+        Random rnd = new Random();
 
+        for (int i = 0; i < N; i++)
+        {
+            for (int j = 0; j < N; j++)
+            {
+                result[i, j] = rnd.Next(-100, 100);
+            }
+        }
 
-        return Multiply(maxA, X_B_C);
+        return result;
     }
 
-    public int F2()
+    private int[] GenerateVector(string name, int fallback)
     {
-        int[,] MH = GenerateMatrix();
-        int[,] MK = GenerateMatrix();
-        int[,] ML = GenerateMatrix();
+        if (!isLarge)
+        {
+            return ReadLinear(name, N, fallback);
+        }
 
-        int[,] MH_MK = Multiply(MH, MK);
-        int[,] MH_MK_ML = Sub(MH_MK, ML);
+        int[] result = new int[N];
 
-        return Max(MH_MK_ML);
-    }
+        Random rnd = new Random();
 
-    public int[] F3()
-    {
-        int[] R = GenerateVector();
-        int[] V = GenerateVector();
+        for (int i = 0; i < N; i++)
+        {
+            result[i] = rnd.Next(-100, 100);
+        }
 
-        int[] R_V = Add(R, V);
-
-        int[,] MO = GenerateMatrix();
-        int[,] MP = GenerateMatrix();
-
-        int[,] MO_MP = Multiply(MO, MP);
-
-        return Multiply(R_V, MO_MP);
+        return result;
     }
 }
